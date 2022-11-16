@@ -53,11 +53,13 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     python-rosinstall-generator \
     python-rosdep \
     python-catkin-tools \
+    ros-melodic-moveit-commander \
     python
 
 RUN /bin/bash -c "source /opt/ros/melodic/setup.bash"
-RUN mkdir -p /root/catkin_ws/src \
-	&& cd /root/catkin_ws \
+RUN mkdir -p /root/catkin_ws/src
+COPY src/ur_control /root/catkin_ws/src/ur_control
+RUN cd /root/catkin_ws \
     && git clone https://github.com/UniversalRobots/Universal_Robots_ROS_Driver.git src/Universal_Robots_ROS_Driver \
     && git clone -b melodic-devel-staging https://github.com/ros-industrial/universal_robot.git src/universal_robot \
     && apt-get update -qq \
@@ -65,5 +67,8 @@ RUN mkdir -p /root/catkin_ws/src \
     && /bin/bash -c "source /opt/ros/melodic/setup.bash; cd /root/catkin_ws; catkin_make" \
     && echo "source /root/catkin_ws/devel/setup.bash" >> ~/.bashrc \
     && echo "export ROS_PACKAGE_PATH=\${ROS_PACKAGE_PATH}:/root/catkin_ws" >> ~/.bashrc \
-    && echo "export ROS_WORKSPACE=/root/catkin_ws" >> ~/.bashrc
+    && echo "export ROS_WORKSPACE=/root/catkin_ws" >> ~/.bashrc \ 
+    && echo "chmod -R u+x /root/catkin_ws/src/ur_control/scripts" >> ~/.bashrc
 
+#COPY pip/requirements.txt requirements.txt
+#RUN pip install -r requirements.txt
