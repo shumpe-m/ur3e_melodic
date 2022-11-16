@@ -23,7 +23,7 @@ class PlottingRPY:
         # self.start_time = time.time()
         ## parameter
         self.interval = 0.1
-        self.shown_size = 1000
+        self.shown_size = 100
 
         ## initialization
         self.initializePlot()
