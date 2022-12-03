@@ -1,4 +1,6 @@
-# ur-Ubuntu18
+# ur3e-melodic
+
+ubuntu18.04, melodic
 
 ## Set up
 ```
