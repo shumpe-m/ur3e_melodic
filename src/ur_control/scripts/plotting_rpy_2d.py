@@ -34,7 +34,7 @@ class PlottingRPY:
         self.rpy = msg
 
     def initializePlot(self):
-        plt.figure(figsize = [12,4,4])
+        plt.figure(figsize = [12,4])
         plt.ion()	#interactive mode on
         ## empty list
         self.list_x = [0 for i in range(self.shown_size)]

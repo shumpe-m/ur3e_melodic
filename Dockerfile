@@ -43,6 +43,12 @@ RUN git clone https://gitlab.kitware.com/cmake/cmake.git \
 	&& rm -rf cmake
 
 
+######################
+### ur_control pkg ###
+######################
+COPY src /root/catkin_ws/src
+
+
 ###########################################
 ### INSTALL Universal_Robots_ROS_Driver ###
 ###########################################
@@ -58,7 +64,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 RUN /bin/bash -c "source /opt/ros/melodic/setup.bash"
 RUN mkdir -p /root/catkin_ws/src
-COPY src/ur_control /root/catkin_ws/src/ur_control
 RUN cd /root/catkin_ws \
     && git clone https://github.com/UniversalRobots/Universal_Robots_ROS_Driver.git src/Universal_Robots_ROS_Driver \
     && git clone -b melodic-devel-staging https://github.com/ros-industrial/universal_robot.git src/universal_robot \
@@ -70,5 +75,4 @@ RUN cd /root/catkin_ws \
     && echo "export ROS_WORKSPACE=/root/catkin_ws" >> ~/.bashrc \ 
     && echo "chmod -R u+x /root/catkin_ws/src/ur_control/scripts" >> ~/.bashrc
 
-#COPY pip/requirements.txt requirements.txt
-#RUN pip install -r requirements.txt
+RUN echo "cd ~/catkin_ws" >> ~/.bashrc
