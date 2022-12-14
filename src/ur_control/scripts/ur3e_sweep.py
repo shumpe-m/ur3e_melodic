@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-
 # Python 2/3 compatibility imports
 from __future__ import print_function
 from six.moves import input
@@ -12,6 +11,7 @@ import moveit_commander
 import moveit_msgs.msg
 import geometry_msgs.msg
 from gazebo_msgs.msg import ModelStates
+from cube_pose_controll import cube_pose_controll
 
 import numpy as np
 
@@ -29,7 +29,7 @@ except:  # For Python 2 compatibility
 from std_msgs.msg import String
 from moveit_commander.conversions import pose_to_list
 
-
+# https://github.com/ros-planning/moveit_tutorials/blob/master/doc/move_group_python_interface/scripts/move_group_python_interface_tutorial.py
 def all_close(goal, actual, tolerance):
     """
     Convenience method for testing if the values in two lists are within a tolerance of each other.
@@ -114,15 +114,15 @@ class ur_control(object):
     def callbackVector(self, msg):
         self.rpy = msg
 
-    def go_to_joint_state(self):
+    def go_to_joint_state(self, vec = "x"):
         move_group = self.move_group
         joint_goal = move_group.get_current_joint_values()
-        joint_goal[0] = 1.57
+        joint_goal[0] = 3.14
         joint_goal[1] = -1.57
         joint_goal[2] = 1.30
-        joint_goal[3] = -1.57
+        joint_goal[3] = -1.26
         joint_goal[4] = -1.57
-        joint_goal[5] = 0
+        joint_goal[5] = 1.57 if vec == "x" else 0
 
         move_group.go(joint_goal, wait=True)
         move_group.stop()
@@ -157,7 +157,7 @@ class ur_control(object):
 
         return all_close(pose_goal, current_pose, 0.01)
 
-    def plan_cartesian_path(self, scale=0.1):
+    def plan_cartesian_path(self, scale=0.1, vec = "x"):
         while self.rpy.pose == []:
             pass
         move_group = self.move_group
@@ -165,14 +165,41 @@ class ur_control(object):
         waypoints = []
         joint_goal = move_group.get_current_joint_values()
         wpose = move_group.get_current_pose().pose
-        dx = self.rpy.pose[5].position.x - (wpose.position.x + self.rpy.pose[6].position.x)
-        dy = self.rpy.pose[5].position.y - (wpose.position.y + self.rpy.pose[6].position.y)
-        dz = self.rpy.pose[5].position.z - (wpose.position.z + self.rpy.pose[6].position.z - 0.15)
-        print(dx,dy,dz)
+        # 0.025 = box's half side, 0.01 = offset or jig position, 0.015 = jig's half side 0.02 = offset
+        dx = self.rpy.pose[3].position.x - (wpose.position.x + self.rpy.pose[4].position.x - 0.025)
+        dx = dx + 0.01 if vec == "x" else dx
+        dy = self.rpy.pose[3].position.y - (wpose.position.y + self.rpy.pose[4].position.y + 0.01 + 0.015 + 0.025)
+        dy = dy + 0.01 if vec == "y" else dy
+        dz = self.rpy.pose[3].position.z - (wpose.position.z + self.rpy.pose[4].position.z - 0.15 - 0.02)
+        #print(dx,dy,dz)
         for i in range(r):
             wpose.position.x = wpose.position.x + dx/r
             wpose.position.y = wpose.position.y + dy/r
             wpose.position.z = wpose.position.z + dz/r
+            waypoints.append(copy.deepcopy(wpose))
+        (plan, fraction) = move_group.compute_cartesian_path(
+            waypoints, 0.01, 0.0  # waypoints to follow  # eef_step
+        )
+        return plan, fraction
+
+    def plan_push_path(self, scale=0.1, vec="x"):
+        while self.rpy.pose == []:
+            pass
+        move_group = self.move_group
+        r = 10
+        rand = np.random.rand(2)
+        waypoints = []
+        joint_goal = move_group.get_current_joint_values()
+        wpose = move_group.get_current_pose().pose
+        dx = rand[1] * -0.1 if vec == "x" else 0
+        dy = rand[0] * 0.1 if vec == "y" else 0
+        x_target = self.rpy.pose[3].position.x + dx
+        y_target = self.rpy.pose[3].position.y + dy
+        msg = "target x position:" + str(x_target) if vec == "x" else "target y position:" + str(y_target)
+        print(msg)
+        for i in range(r):
+            wpose.position.x = wpose.position.x + (dx - 0.025 - 0.015)/r
+            wpose.position.y = wpose.position.y + (dy + 0.025)/r
             waypoints.append(copy.deepcopy(wpose))
         (plan, fraction) = move_group.compute_cartesian_path(
             waypoints, 0.01, 0.0  # waypoints to follow  # eef_step
@@ -193,18 +220,66 @@ class ur_control(object):
         move_group = self.move_group
         move_group.execute(plan, wait=True)
 
+    def wait_for_state_update(
+        self, box_is_known=False, box_is_attached=False, timeout=4
+    ):
+        box_name = self.box_name
+        scene = self.scene
+        start = rospy.get_time()
+        seconds = rospy.get_time()
+        while (seconds - start < timeout) and not rospy.is_shutdown():
+            # Test if the box is in attached objects
+            attached_objects = scene.get_attached_objects([box_name])
+            is_attached = len(attached_objects.keys()) > 0
+            is_known = box_name in scene.get_known_object_names()
+
+            if (box_is_attached == is_attached) and (box_is_known == is_known):
+                return True
+            rospy.sleep(0.1)
+            seconds = rospy.get_time()
+        return False
+
+    def add_box(self, timeout=4):
+        box_name = self.box_name
+        scene = self.scene
+        box_pose = geometry_msgs.msg.PoseStamped()
+        box_pose.header.frame_id = self.move_group.get_planning_frame()
+        rand = np.random.rand(2)
+        box_pose.pose.position.x = rand[0] * 0.5 -0.375
+        box_pose.pose.position.y = rand[1] * 0.4 - 0.2
+        box_pose.pose.position.z = 0.81
+        box_pose.pose.orientation.w = 1.0
+        box_name = "box1"
+        scene.add_box(box_name, box_pose, size=(0.05, 0.05, 0.05))
+        self.box_name = box_name
+        return self.wait_for_state_update(box_is_known=True, timeout=timeout)
+
+    def remove_box(self, timeout=4):
+        box_name = self.box_name
+        scene = self.scene
+        scene.remove_world_object(box_name)
+        return self.wait_for_state_update(
+            box_is_attached=False, box_is_known=False, timeout=timeout
+        )
+
+    def cube_controll(self):
+        cube_con = cube_pose_controll()
+        cube_con.pose_controll()
+        time.sleep(0.1)
+
+
     def print_rpy(self):
         #time.sleep(0.1)
         #print("rpy= ", self.rpy.pose[4:7])
 
         while self.rpy.pose == []:
             pass
-        print("rpy= ", self.rpy.pose[5].position.z)
+        print("rpy= ", self.rpy.pose[3].position)
 
     def current_pos(self):
         move_group = self.move_group
         wpose = move_group.get_current_pose().pose
-        print("pose= ", wpose)
+        print("pose= ", wpose.position)
 
 
 def main():
@@ -216,13 +291,31 @@ def main():
         print("Press Ctrl-D to exit at any time")
         print("")
         tutorial = ur_control("manipulator")
+        # start joint state
+        tutorial.go_to_joint_state(vec = "x")
+        tutorial.cube_controll()
+        time.sleep(0.1)
         tutorial.print_rpy()
-        tutorial.current_pos()
-        #tutorial.go_to_pose_goal()
-        cartesian_plan, fraction = tutorial.plan_cartesian_path()
+        # cube push x axis
+        cartesian_plan, fraction = tutorial.plan_cartesian_path(vec = "x")
         tutorial.execute_plan(cartesian_plan)
-        tutorial.current_pos()
+        time.sleep(0.1)
+        cartesian_plan, fraction = tutorial.plan_push_path(vec = "x")
+        tutorial.execute_plan(cartesian_plan)
+        # cube push y axis
+        tutorial.go_to_joint_state(vec = "x")
+        tutorial.go_to_joint_state(vec = "y")
+        cartesian_plan, fraction = tutorial.plan_cartesian_path(vec = "y")
+        tutorial.execute_plan(cartesian_plan)
+        time.sleep(0.1)
+        cartesian_plan, fraction = tutorial.plan_push_path(vec = "y")
+        tutorial.execute_plan(cartesian_plan)
 
+        time.sleep(0.1)
+        #tutorial.current_pos()
+        #tutorial.add_box()
+        tutorial.print_rpy()
+        tutorial.go_to_joint_state(vec = "y")
 
 
 

@@ -85,6 +85,7 @@
     </model>
 
     <!-- Cubes -->
+    <!--
     <model name="cube1">
       <pose>-0.4 -0.2 0.775 0 0 0</pose>
       <link name="link">
@@ -198,6 +199,7 @@
         </visual>
       </link>
     </model>
+    -->
 
     <model name="cube3">
       <pose>-0.4 0.2 0.775 0 0 0</pose>
@@ -255,6 +257,7 @@
         </visual>
       </link>
     </model>
+    
 
   </world>
 
