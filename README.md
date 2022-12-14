@@ -1,6 +1,7 @@
 # ur3e-melodic
 
 ubuntu18.04, melodic
+src内rosパッケージ
 
 ## Set up
 Dockerによる環境構築
@@ -45,7 +46,7 @@ roslaunch ur3e_gazebo ur3e_sweep.launch
 ```
 
 ```
-roslaunch ur3e_zig_moveit_config start_moveit.launch
+roslaunch ur3e_jig_moveit_config start_moveit.launch
 ```
 
 ```

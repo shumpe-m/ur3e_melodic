@@ -74,17 +74,17 @@
   <!-- Robotiq Coupler -->
   <!--  + Height added by the coupler: 8mm -->
   <!--  + Reference frame: at the middle (4mm) -->
-  <link name="zig">
+  <link name="jig">
     <visual>
       <origin xyz="0 0 0" rpy="0 ${-pi} ${pi/2}" />
       <geometry>
-        <mesh filename="package://ur3e_gazebo/meshes/zig.stl" scale="0.001 0.001 0.001" />
+        <mesh filename="package://ur3e_gazebo/meshes/jig.stl" scale="0.001 0.001 0.001" />
       </geometry>
     </visual>
     <collision>
       <origin xyz="0 0 0" rpy="0 ${-pi} ${pi/2}" />
       <geometry>
-        <mesh filename="package://ur3e_gazebo/meshes/zig.stl" scale="0.001 0.001 0.001" />
+        <mesh filename="package://ur3e_gazebo/meshes/jig.stl" scale="0.001 0.001 0.001" />
       </geometry>
     </collision>
     <inertial>
@@ -93,21 +93,21 @@
     </inertial>
   </link>
 
-  <joint name="zig_joint" type="fixed">
+  <joint name="jig_joint" type="fixed">
     <origin xyz="0.01 0.015 0.15" rpy="0 0 0" />
     <parent link="tool0"/>
-    <child link="zig"/>
+    <child link="jig"/>
   </joint>
-  <gazebo reference="zig">
+  <gazebo reference="jig">
     <mu1>0.57</mu1>
     <mu2>0.57</mu2>
   </gazebo>
 
-  <link name="ur_zig_tip_link" />
+  <link name="ur_jig_tip_link" />
   <joint name="manipulator_dummy_joint" type="fixed">
     <origin xyz="0 0 0.1441" rpy="0 0 0" />
-    <parent link="zig"/>
-    <child link="ur_zig_tip_link"/>
+    <parent link="jig"/>
+    <child link="ur_jig_tip_link"/>
   </joint>
 
 </robot>

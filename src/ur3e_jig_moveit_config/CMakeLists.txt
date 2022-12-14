@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.0.2)
-project(ur3e_zig_moveit_config)
+project(ur3e_jig_moveit_config)
 
 find_package(catkin REQUIRED)
 

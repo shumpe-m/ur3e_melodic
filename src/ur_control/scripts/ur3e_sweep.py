@@ -5,6 +5,7 @@ from __future__ import print_function
 from six.moves import input
 
 import sys
+import time
 import copy
 import rospy
 import moveit_commander
@@ -129,32 +130,52 @@ class ur_control(object):
         return all_close(joint_goal, current_joints, 0.01)
 
     def go_to_pose_goal(self):
+        while self.rpy.pose == []:
+            pass
+        current_pose = self.move_group.get_current_pose().pose
         move_group = self.move_group
         pose_goal = geometry_msgs.msg.Pose()
-        pose_goal.position.y = -0.1
+        # pose_goal.position.x = self.rpy.pose[5].position.x
+        # pose_goal.position.y = self.rpy.pose[5].position.y
+        # pose_goal.position.z = self.rpy.pose[5].position.z
+        pose_goal.position.x = current_pose.position.x
+        pose_goal.position.y = current_pose.position.y
+        pose_goal.position.z = current_pose.position.z
+        # pose_goal.orientation.x = current_pose.orientation.x 
+        # pose_goal.orientation.y = current_pose.orientation.y
+        # pose_goal.orientation.z = current_pose.orientation.z
+        # pose_goal.orientation.w = current_pose.orientation.w
+        pose_goal.orientation.x = -0.978
+        pose_goal.orientation.y = 0
+        pose_goal.orientation.z = 0
+        pose_goal.orientation.w = 0.151
+        print(pose_goal)
         move_group.set_pose_target(pose_goal)
         success = move_group.go(wait=True)
         move_group.stop()
         move_group.clear_pose_targets()
 
-        current_pose = self.move_group.get_current_pose().pose
         return all_close(pose_goal, current_pose, 0.01)
 
     def plan_cartesian_path(self, scale=0.1):
+        while self.rpy.pose == []:
+            pass
         move_group = self.move_group
-        r = 10
+        r = 5
         waypoints = []
         joint_goal = move_group.get_current_joint_values()
         wpose = move_group.get_current_pose().pose
-        wpose.position.z -= 0.1  # First move up (z)
-        waypoints.append(copy.deepcopy(wpose))
-        wpose_0 = copy.deepcopy(wpose)
-        for i in range(2*r+1):
-            wpose.position.z = wpose_0.position.z - scale * np.sin(i * 2 * np.pi/r)  # First move up (z)
-            wpose.position.y = wpose_0.position.y + scale * np.cos(i * 2 * np.pi/r)  # and sideways (y)
+        dx = self.rpy.pose[5].position.x - (wpose.position.x + self.rpy.pose[6].position.x)
+        dy = self.rpy.pose[5].position.y - (wpose.position.y + self.rpy.pose[6].position.y)
+        dz = self.rpy.pose[5].position.z - (wpose.position.z + self.rpy.pose[6].position.z - 0.15)
+        print(dx,dy,dz)
+        for i in range(r):
+            wpose.position.x = wpose.position.x + dx/r
+            wpose.position.y = wpose.position.y + dy/r
+            wpose.position.z = wpose.position.z + dz/r
             waypoints.append(copy.deepcopy(wpose))
         (plan, fraction) = move_group.compute_cartesian_path(
-            waypoints, 0.02, 0.0  # waypoints to follow  # eef_step
+            waypoints, 0.01, 0.0  # waypoints to follow  # eef_step
         )
         return plan, fraction
 
@@ -172,6 +193,19 @@ class ur_control(object):
         move_group = self.move_group
         move_group.execute(plan, wait=True)
 
+    def print_rpy(self):
+        #time.sleep(0.1)
+        #print("rpy= ", self.rpy.pose[4:7])
+
+        while self.rpy.pose == []:
+            pass
+        print("rpy= ", self.rpy.pose[5].position.z)
+
+    def current_pos(self):
+        move_group = self.move_group
+        wpose = move_group.get_current_pose().pose
+        print("pose= ", wpose)
+
 
 def main():
     try:
@@ -181,31 +215,18 @@ def main():
         print("----------------------------------------------------------")
         print("Press Ctrl-D to exit at any time")
         print("")
-        input(
-            "============ Press `Enter` to begin the tutorial by setting up the moveit_commander ..."
-        )
         tutorial = ur_control("manipulator")
-
-        input(
-            "============ Press `Enter` to execute a movement using a joint state goal ..."
-        )
-        #tutorial.go_to_joint_state()
-
-        input("============ Press `Enter` to execute a movement using a pose goal ...")
+        tutorial.print_rpy()
+        tutorial.current_pos()
         #tutorial.go_to_pose_goal()
-
-        input("============ Press `Enter` to plan and display a Cartesian path ...")
         cartesian_plan, fraction = tutorial.plan_cartesian_path()
-
-        input(
-            "============ Press `Enter` to display a saved trajectory (this will replay the Cartesian path)  ..."
-        )
-        tutorial.display_trajectory(cartesian_plan)
-
-        input("============ Press `Enter` to execute a saved path ...")
         tutorial.execute_plan(cartesian_plan)
+        tutorial.current_pos()
 
-        print("============ Python tutorial demo complete!")
+
+
+
+        
     except rospy.ROSInterruptException:
         return
     except KeyboardInterrupt:
