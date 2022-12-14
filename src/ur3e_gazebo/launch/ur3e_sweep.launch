@@ -11,7 +11,7 @@
   <arg name="world_name" default="$(find ur3e_gazebo)/worlds/ur3e_cubes.world" />
 
   <!--Robot description and related parameter files -->
-  <arg name="robot_description_file" default="$(dirname)/inc/load_ur_zig.launch.xml" doc="Launch file which populates the 'robot_description' parameter."/>
+  <arg name="robot_description_file" default="$(dirname)/inc/load_ur_jig.launch.xml" doc="Launch file which populates the 'robot_description' parameter."/>
   <arg name="ur_robot" default="ur3e"/>
 
   <!-- Load controller settings -->
