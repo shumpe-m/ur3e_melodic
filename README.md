@@ -6,7 +6,7 @@ src内rosパッケージ
 ## Set up
 Dockerによる環境構築
 ```
-git clone https://github.com/shunpe-hash/ur-Ubuntu18.git
+git clone https://github.com/shumpe-m/ur3e_melodic.git
 cd ur-Ubuntu18/Docker
 ./build.sh
 ./run.sh
