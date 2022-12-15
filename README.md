@@ -39,6 +39,9 @@ rosrun ur_control plotting_rpy_2d.py
 rosrun ur_control ur_planner.py
 ```
 
+
+![demo](https://raw.github.com/wiki/shumpe-m/ur3e_melodic/images/ur3e_test.gif)
+
 ## box sweep
 それぞれ別のターミナルでコードを実行。
 ```
@@ -52,3 +55,6 @@ roslaunch ur3e_jig_moveit_config start_moveit.launch
 ```
 rosrun ur_control ur3e_sweep.py
 ```
+
+
+![sweep](https://raw.github.com/wiki/shumpe-m/ur3e_melodic/images/sweep.gif)
