@@ -7,7 +7,7 @@ src内rosパッケージ
 Dockerによる環境構築
 ```
 git clone https://github.com/shumpe-m/ur3e_melodic.git
-cd ur-Ubuntu18/Docker
+cd ur3e_melodic/Docker
 ./build.sh
 ./run.sh
 ```
