@@ -46,9 +46,9 @@ RUN git clone https://gitlab.kitware.com/cmake/cmake.git \
 ######################
 ### ur_control pkg ###
 ######################
-RUN mkdir -p /root/catkin_ws/src
-RUN cd /root/catkin_ws \
-    && git clone https://github.com/shumpe-m/ur3e_melodic.git src/ur3e_melodic 
+RUN mkdir -p /root/catkin_ws/src \
+    && cd /root/catkin_ws \
+    && git clone https://github.com/shumpe-m/ur3e_melodic.git src/ur3e_melodic
 
 ###########################################
 ### INSTALL Universal_Robots_ROS_Driver ###
@@ -65,6 +65,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 RUN /bin/bash -c "source /opt/ros/melodic/setup.bash"
 RUN cd /root/catkin_ws \
+    && rosinstall /root/catkin_ws/src /opt/ros/melodic src/ur3e_melodic/dependencies.rosinstall \
     && git clone https://github.com/UniversalRobots/Universal_Robots_ROS_Driver.git src/Universal_Robots_ROS_Driver \
     && git clone -b melodic-devel-staging https://github.com/ros-industrial/universal_robot.git src/universal_robot \
     && apt-get update -qq \
