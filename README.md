@@ -1,10 +1,10 @@
 # ur3e-melodic
 
-ubuntu18.04, melodic
-src内rosパッケージ
+- ubuntu18.04, melodic
+- L字型のジグを装着したur3e
 
 ## Set up
-Dockerによる環境構築
+- Dockerによる環境構築
 ```
 git clone https://github.com/shumpe-m/ur3e_melodic.git
 cd ur3e_melodic/Docker
@@ -12,7 +12,7 @@ cd ur3e_melodic/Docker
 ./run.sh
 ```
 ## Usage
-5つのターミナルでそれぞれコマンドを使用。(docker exec -it ${docker_container_id} bash)
+- 5つのターミナルでそれぞれコマンドを使用。(docker exec -it ${docker_container_id} bash)
 
 (1) 1つめのターミナル:Gazebo起動
 ```
@@ -42,7 +42,8 @@ rosrun ur_control ur_planner.py
 
 ![demo](https://raw.github.com/wiki/shumpe-m/ur3e_melodic/images/ur3e_test.gif)
 
-## box sweep
+## Box sweep
+- L字型のジグを装着したur3eの起動コード
 それぞれ別のターミナルでコードを実行。
 ```
 roslaunch ur3e_gazebo ur3e_sweep.launch
