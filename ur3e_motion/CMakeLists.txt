@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(ur_control)
+project(ur3e_motion)
 
 find_package(catkin REQUIRED COMPONENTS
   control_msgs

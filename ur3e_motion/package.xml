@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <package>
-  <name>ur_control</name>
+  <name>ur3e_motion</name>
   <version>0.1.0</version>
   <description>The ur_control package</description>
   <author email="d1301539@gmail.com">Shunpei Morita</author>
