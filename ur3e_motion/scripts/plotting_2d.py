@@ -7,12 +7,12 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 
 # https://lilaboc.work/archives/23793422.html
-class PlottingRPY:
+class Plotting:
     def __init__(self):
         ## subscriber
         self.sub_vector = rospy.Subscriber("/gazebo/link_states", LinkStates, self.callbackVector)
         ## msg
-        self.rpy = LinkStates()
+        self.pose = LinkStates()
         ## list
         self.list_x = []
         self.list_y = []
@@ -31,7 +31,7 @@ class PlottingRPY:
         self.mainLoop()
 
     def callbackVector(self, msg):
-        self.rpy = msg
+        self.pose = msg
 
     def initializePlot(self):
         plt.figure(figsize = [12,4])
@@ -71,11 +71,10 @@ class PlottingRPY:
 
     def updatePlot(self):
         ## append
-        if self.rpy.pose != []:
-            #print(self.rpy)
-            self.list_x.append(self.rpy.pose[7].position.x)
-            self.list_y.append(self.rpy.pose[7].position.y)
-            self.list_z.append(self.rpy.pose[7].position.z)
+        if self.pose.pose != []:
+            self.list_x.append(self.pose.pose[7].position.x)
+            self.list_y.append(self.pose.pose[7].position.y)
+            self.list_z.append(self.pose.pose[7].position.z)
             ## pop
             self.list_x.pop(0)
             self.list_y.pop(0)
@@ -98,8 +97,8 @@ class PlottingRPY:
         plt.pause(self.interval)
 
 def main():
-    rospy.init_node('plotting_rpy', anonymous=True)
-    plotting_rpy = PlottingRPY()
+    rospy.init_node('plotting', anonymous=True)
+    plotting = Plotting()
     rospy.spin()
 
 if __name__ == '__main__':

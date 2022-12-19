@@ -31,7 +31,7 @@ roslaunch ur3e_moveit_config moveit_rviz.launch
 
 (4) 4つめのターミナル:GazeboのUR3eのエンドエフェクタの軌道を描画(過去10sの軌道)
 ```
-rosrun ur3e_motion plotting_rpy_2d.py
+rosrun ur3e_motion plotting_2d.py
 ```
 
 (5) 5つめのターミナル:UR3eの軌道生成コードの起動（y-z空間でエンドエフェクタが円を描く軌道）
