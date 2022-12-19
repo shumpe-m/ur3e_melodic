@@ -109,10 +109,10 @@ class ur_control(object):
 
         # ros message
         self.sub_vector = rospy.Subscriber("/gazebo/model_states", ModelStates, self.callbackVector)
-        self.rpy = ModelStates()
+        self.model_state = ModelStates()
 
     def callbackVector(self, msg):
-        self.rpy = msg
+        self.model_state = msg
 
     def go_to_joint_state(self, vec = "x"):
         move_group = self.move_group
@@ -130,21 +130,14 @@ class ur_control(object):
         return all_close(joint_goal, current_joints, 0.01)
 
     def go_to_pose_goal(self):
-        while self.rpy.pose == []:
+        while self.model_state.pose == []:
             pass
         current_pose = self.move_group.get_current_pose().pose
         move_group = self.move_group
         pose_goal = geometry_msgs.msg.Pose()
-        # pose_goal.position.x = self.rpy.pose[5].position.x
-        # pose_goal.position.y = self.rpy.pose[5].position.y
-        # pose_goal.position.z = self.rpy.pose[5].position.z
         pose_goal.position.x = current_pose.position.x
         pose_goal.position.y = current_pose.position.y
         pose_goal.position.z = current_pose.position.z
-        # pose_goal.orientation.x = current_pose.orientation.x 
-        # pose_goal.orientation.y = current_pose.orientation.y
-        # pose_goal.orientation.z = current_pose.orientation.z
-        # pose_goal.orientation.w = current_pose.orientation.w
         pose_goal.orientation.x = -0.978
         pose_goal.orientation.y = 0
         pose_goal.orientation.z = 0
@@ -158,7 +151,7 @@ class ur_control(object):
         return all_close(pose_goal, current_pose, 0.01)
 
     def plan_cartesian_path(self, scale=0.1, vec = "x"):
-        while self.rpy.pose == []:
+        while self.model_state.pose == []:
             pass
         move_group = self.move_group
         r = 5
@@ -166,11 +159,11 @@ class ur_control(object):
         joint_goal = move_group.get_current_joint_values()
         wpose = move_group.get_current_pose().pose
         # 0.025 = box's half side, 0.01 = offset or jig position, 0.015 = jig's half side 0.02 = offset
-        dx = self.rpy.pose[3].position.x - (wpose.position.x + self.rpy.pose[4].position.x - 0.025)
+        dx = self.model_state.pose[3].position.x - (wpose.position.x + self.model_state.pose[4].position.x - 0.025)
         dx = dx + 0.01 if vec == "x" else dx
-        dy = self.rpy.pose[3].position.y - (wpose.position.y + self.rpy.pose[4].position.y + 0.01 + 0.015 + 0.025)
+        dy = self.model_state.pose[3].position.y - (wpose.position.y + self.model_state.pose[4].position.y + 0.01 + 0.015 + 0.025)
         dy = dy + 0.01 if vec == "y" else dy
-        dz = self.rpy.pose[3].position.z - (wpose.position.z + self.rpy.pose[4].position.z - 0.15 - 0.02)
+        dz = self.model_state.pose[3].position.z - (wpose.position.z + self.model_state.pose[4].position.z - 0.15 - 0.02)
         #print(dx,dy,dz)
         for i in range(r):
             wpose.position.x = wpose.position.x + dx/r
@@ -183,7 +176,7 @@ class ur_control(object):
         return plan, fraction
 
     def plan_push_path(self, scale=0.1, vec="x"):
-        while self.rpy.pose == []:
+        while self.model_state.pose == []:
             pass
         move_group = self.move_group
         r = 10
@@ -193,8 +186,8 @@ class ur_control(object):
         wpose = move_group.get_current_pose().pose
         dx = rand[1] * -0.1 if vec == "x" else 0
         dy = rand[0] * 0.1 if vec == "y" else 0
-        x_target = self.rpy.pose[3].position.x + dx
-        y_target = self.rpy.pose[3].position.y + dy
+        x_target = self.model_state.pose[3].position.x + dx
+        y_target = self.model_state.pose[3].position.y + dy
         msg = "target x position:" + str(x_target) if vec == "x" else "target y position:" + str(y_target)
         print(msg)
         for i in range(r):
@@ -268,13 +261,12 @@ class ur_control(object):
         time.sleep(0.1)
 
 
-    def print_rpy(self):
+    def print_model_state(self):
         #time.sleep(0.1)
-        #print("rpy= ", self.rpy.pose[4:7])
 
-        while self.rpy.pose == []:
+        while self.model_state.pose == []:
             pass
-        print("rpy= ", self.rpy.pose[3].position)
+        print("model_state= ", self.model_state.pose[3].position)
 
     def current_pos(self):
         move_group = self.move_group
@@ -295,7 +287,7 @@ def main():
         tutorial.go_to_joint_state(vec = "x")
         tutorial.cube_controll()
         time.sleep(0.1)
-        tutorial.print_rpy()
+        tutorial.print_model_state()
         # cube push x axis
         cartesian_plan, fraction = tutorial.plan_cartesian_path(vec = "x")
         tutorial.execute_plan(cartesian_plan)
@@ -314,7 +306,7 @@ def main():
         time.sleep(0.1)
         #tutorial.current_pos()
         #tutorial.add_box()
-        tutorial.print_rpy()
+        tutorial.print_model_state()
         tutorial.go_to_joint_state(vec = "y")
 
 
