@@ -78,6 +78,6 @@ RUN cd /root/catkin_ws \
     && echo "source /root/catkin_ws/devel/setup.bash" >> ~/.bashrc \
     && echo "export ROS_PACKAGE_PATH=\${ROS_PACKAGE_PATH}:/root/catkin_ws" >> ~/.bashrc \
     && echo "export ROS_WORKSPACE=/root/catkin_ws" >> ~/.bashrc \ 
-    && echo "chmod -R u+x /root/catkin_ws/src/ur3e_motion/scripts" >> ~/.bashrc
+    && echo "chmod -R u+x /root/catkin_ws/src/ur3e_melodic/ur3e_motion/scripts" >> ~/.bashrc
 
 RUN echo "cd ~/catkin_ws" >> ~/.bashrc
